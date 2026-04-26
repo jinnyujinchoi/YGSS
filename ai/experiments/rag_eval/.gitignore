@@ -1,0 +1,9 @@
+.env
+__pycache__/
+.pytest_cache/
+results/tmp_*.json
+results/tmp_*.csv
+results/tmp_*.png
+results/raw_*.json
+results/raw_*.csv
+results/raw_*.png
