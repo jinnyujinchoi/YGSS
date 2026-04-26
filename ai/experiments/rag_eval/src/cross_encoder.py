@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from difflib import SequenceMatcher
+import math
 import re
-from typing import Dict, Iterable, List, Sequence, Tuple
+from typing import Dict, List, Sequence, Tuple
 
 try:
     from sentence_transformers import CrossEncoder as STCrossEncoder
@@ -22,12 +23,33 @@ class CandidateAnswer:
     answer: str
 
 
+@dataclass
+class PairScore:
+    """Score pair containing raw and normalized values."""
+
+    raw_score: float
+    normalized_score: float
+
+
 class BaseCrossEncoderScorer:
     """Cross-encoder scorer base class."""
 
     def score_pairs(self, pairs: Sequence[Tuple[str, str]]) -> List[float]:
-        """Return relevance scores for (query, answer) pairs."""
+        """Return raw relevance scores for (query, answer) pairs."""
         raise NotImplementedError
+
+    def normalize_raw_scores(self, raw_scores: Sequence[float]) -> List[float]:
+        """Normalize raw scores into [0, 1] for model-agnostic diagnostics."""
+        return [1.0 / (1.0 + math.exp(-float(score))) for score in raw_scores]
+
+    def score_pairs_detailed(self, pairs: Sequence[Tuple[str, str]]) -> List[PairScore]:
+        """Return raw + normalized score objects."""
+        raw_scores = self.score_pairs(pairs)
+        normalized_scores = self.normalize_raw_scores(raw_scores)
+        return [
+            PairScore(raw_score=float(raw), normalized_score=float(norm))
+            for raw, norm in zip(raw_scores, normalized_scores)
+        ]
 
 
 class SentenceTransformerScorer(BaseCrossEncoderScorer):
@@ -36,6 +58,7 @@ class SentenceTransformerScorer(BaseCrossEncoderScorer):
     def __init__(self, model_name: str) -> None:
         if STCrossEncoder is None:
             raise RuntimeError("sentence-transformers is not available")
+        self.model_name = model_name
         self.model = STCrossEncoder(model_name)
 
     def score_pairs(self, pairs: Sequence[Tuple[str, str]]) -> List[float]:
@@ -70,6 +93,13 @@ class LexicalFallbackScorer(BaseCrossEncoderScorer):
             scores.append(float(score))
         return scores
 
+    def normalize_raw_scores(self, raw_scores: Sequence[float]) -> List[float]:
+        normalized: List[float] = []
+        for score in raw_scores:
+            clamped = min(max(float(score), 0.0), 10.0)
+            normalized.append(clamped / 10.0)
+        return normalized
+
 
 class CrossEncoderRegistry:
     """Loads and provides named cross-encoder scorers."""
@@ -101,7 +131,7 @@ def rerank_candidates(
     threshold: float,
     top_n: int,
 ) -> List[Tuple[CandidateAnswer, float]]:
-    """Rerank and filter candidates by cross-encoder scores."""
+    """Rerank and filter candidates by raw cross-encoder score threshold."""
     if not candidates:
         return []
 
@@ -110,4 +140,31 @@ def rerank_candidates(
 
     ranked = sorted(zip(candidates, scores), key=lambda item: item[1], reverse=True)
     filtered = [(candidate, score) for candidate, score in ranked if score >= threshold]
+    return filtered[:top_n]
+
+
+def rerank_candidates_detailed(
+    query: str,
+    candidates: Sequence[CandidateAnswer],
+    scorer: BaseCrossEncoderScorer,
+    raw_threshold: float,
+    top_n: int,
+) -> List[Tuple[CandidateAnswer, PairScore]]:
+    """Rerank with raw+normalized score diagnostics while filtering on raw score."""
+    if not candidates:
+        return []
+
+    pairs = [(query, candidate.answer) for candidate in candidates]
+    detailed_scores = scorer.score_pairs_detailed(pairs)
+
+    ranked = sorted(
+        zip(candidates, detailed_scores),
+        key=lambda item: item[1].raw_score,
+        reverse=True,
+    )
+    filtered = [
+        (candidate, score)
+        for candidate, score in ranked
+        if score.raw_score >= raw_threshold
+    ]
     return filtered[:top_n]

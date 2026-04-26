@@ -1,0 +1,90 @@
+{
+  "generated_at": "2026-04-26T17:54:30.415972",
+  "sample_pair_count": 20,
+  "results": [
+    {
+      "alias": "baseline_en",
+      "model_name": "cross-encoder/ms-marco-MiniLM-L-12-v2",
+      "loadable": true,
+      "input_pair_supported": true,
+      "raw_score_min": 5.639990329742432,
+      "raw_score_max": 9.391020774841309,
+      "raw_score_mean": 8.014630651473999,
+      "raw_score_p05": 6.914744472503662,
+      "raw_score_p95": 9.137806367874147,
+      "avg_latency_ms": 128.79850629979046,
+      "p95_latency_ms": 387.59969999300665,
+      "model_size_mb": 127.25976943969727,
+      "memory_delta_mb": 154.640625,
+      "license_name": "apache-2.0",
+      "license_allows_commercial": true,
+      "eligible_for_comparison": true,
+      "excluded_reasons": [],
+      "error": ""
+    },
+    {
+      "alias": "ko_reranker",
+      "model_name": "Dongjin-kr/ko-reranker",
+      "loadable": false,
+      "input_pair_supported": false,
+      "raw_score_min": 0.0,
+      "raw_score_max": 0.0,
+      "raw_score_mean": 0.0,
+      "raw_score_p05": 0.0,
+      "raw_score_p95": 0.0,
+      "avg_latency_ms": 0.0,
+      "p95_latency_ms": 0.0,
+      "model_size_mb": 0.0,
+      "memory_delta_mb": 576.03125,
+      "license_name": "unknown",
+      "license_allows_commercial": false,
+      "eligible_for_comparison": false,
+      "excluded_reasons": [
+        "model load failed"
+      ],
+      "error": "Can't load the model for 'Dongjin-kr/ko-reranker'. If you were trying to load it from 'https://huggingface.co/models', make sure you don't have a local directory with the same name. Otherwise, make sure 'Dongjin-kr/ko-reranker' is the correct path to a directory containing a file named pytorch_model.bin."
+    },
+    {
+      "alias": "mmarco_multilingual",
+      "model_name": "cross-encoder/mmarco-mMiniLMv2-L12-H384-v1",
+      "loadable": true,
+      "input_pair_supported": true,
+      "raw_score_min": -5.844400405883789,
+      "raw_score_max": 10.679549217224121,
+      "raw_score_mean": -0.818467739969492,
+      "raw_score_p05": -5.804069781303406,
+      "raw_score_p95": 7.998736166954043,
+      "avg_latency_ms": 123.88904579929658,
+      "p95_latency_ms": 272.40648480801616,
+      "model_size_mb": 448.76514053344727,
+      "memory_delta_mb": 145.46875,
+      "license_name": "apache-2.0",
+      "license_allows_commercial": true,
+      "eligible_for_comparison": true,
+      "excluded_reasons": [],
+      "error": ""
+    },
+    {
+      "alias": "bge_reranker_m3",
+      "model_name": "BAAI/bge-reranker-v2-m3",
+      "loadable": false,
+      "input_pair_supported": false,
+      "raw_score_min": 0.0,
+      "raw_score_max": 0.0,
+      "raw_score_mean": 0.0,
+      "raw_score_p05": 0.0,
+      "raw_score_p95": 0.0,
+      "avg_latency_ms": 0.0,
+      "p95_latency_ms": 0.0,
+      "model_size_mb": 0.0,
+      "memory_delta_mb": 580.234375,
+      "license_name": "mit",
+      "license_allows_commercial": true,
+      "eligible_for_comparison": false,
+      "excluded_reasons": [
+        "model load failed"
+      ],
+      "error": "Can't load the model for 'BAAI/bge-reranker-v2-m3'. If you were trying to load it from 'https://huggingface.co/models', make sure you don't have a local directory with the same name. Otherwise, make sure 'BAAI/bge-reranker-v2-m3' is the correct path to a directory containing a file named pytorch_model.bin."
+    }
+  ]
+}
