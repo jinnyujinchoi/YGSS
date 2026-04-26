@@ -78,6 +78,22 @@ python -m src.runner
   - `results/raw_threshold_sweep_{timestamp}.png`
   - `.gitignore`에서 `tmp_`/`raw_` 임시 파일 패턴 제외
 
+## STEP B (Cross-Encoder 교체) 실험
+- 후보 검증:
+  - `python -m experiments.validate_cross_encoder_candidates`
+  - 산출물: `results/model_candidate_validation.md`
+- 모델 비교 + 임계값 보정:
+  - `python -m experiments.cross_encoder_comparison`
+  - 산출물:
+    - `results/cross_encoder_comparison_{timestamp}.json`
+    - `results/cross_encoder_comparison_{timestamp}.md`
+    - `results/threshold_calibration_{model}.png`
+
+### score 필드 의미
+- `/server/compare` 응답의 `score`는 선택된 Cross-Encoder의 **raw score**입니다.
+- 모델마다 raw score 범위가 달라 threshold 해석도 모델별로 달라집니다.
+- 따라서 threshold는 모델별로 정답/오답 분포에서 별도로 보정해야 합니다.
+
 ## 주의 사항
 - Redis 검색은 `SCAN`만 사용, `KEYS` 미사용
 - Redis 부하 제어 옵션(`scan_count`, `max_keys`, `timeout_seconds`) 제공

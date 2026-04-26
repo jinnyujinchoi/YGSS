@@ -1,4 +1,6 @@
 .env
+.venv/
+.mplcache/
 __pycache__/
 .pytest_cache/
 results/tmp_*.json

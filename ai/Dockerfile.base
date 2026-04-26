@@ -4,7 +4,10 @@ FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
-    TZ=Asia/Seoul
+    TZ=Asia/Seoul \
+    HF_HOME=/app/.cache/huggingface \
+    TRANSFORMERS_CACHE=/app/.cache/huggingface/hub \
+    CROSS_ENCODER_MODEL=cross-encoder/mmarco-mMiniLMv2-L12-H384-v1
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
@@ -21,3 +24,5 @@ RUN groupadd -g 1000 appuser && \
 WORKDIR /app
 COPY requirements.txt ./requirements.txt
 RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN mkdir -p "${HF_HOME}" && \
+    python -c "import os; from sentence_transformers import CrossEncoder; CrossEncoder(os.getenv('CROSS_ENCODER_MODEL'))"

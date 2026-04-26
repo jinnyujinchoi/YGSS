@@ -3,8 +3,9 @@ FROM ygss-ai-base:latest
 COPY . /app/
 
 RUN mkdir -p /app/saved_models && \
+    mkdir -p /app/.cache/huggingface && \
     chown -R appuser:appuser /app && \
-    chmod 755 /app/saved_models
+    chmod 755 /app/saved_models /app/.cache/huggingface
 
 USER appuser
 

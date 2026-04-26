@@ -1,12 +1,32 @@
+import os
+from functools import lru_cache
+from typing import List
+
 from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import List
 from sentence_transformers import CrossEncoder
 
 router = APIRouter()
 
-# Hugging Face에서 미리 학습된 Cross-Encoder 모델 사용
-model = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-12-v2")  
+# Step B calibration artifacts:
+# - selected alias `mmarco_multilingual` maps to model_id
+#   `cross-encoder/mmarco-mMiniLMv2-L12-H384-v1`
+# - ai/experiments/rag_eval/results/cross_encoder_comparison_20260426_180439.md
+# - ai/experiments/rag_eval/results/threshold_calibration_cross-encoder_mmarco-mMiniLMv2-L12-H384-v1.json
+DEFAULT_CROSS_ENCODER_MODEL = "cross-encoder/mmarco-mMiniLMv2-L12-H384-v1"
+DEFAULT_CROSS_ENCODER_THRESHOLD = -2.4304255588090604
+DEFAULT_CROSS_ENCODER_TOP_N = 3
+
+CROSS_ENCODER_MODEL = os.getenv("CROSS_ENCODER_MODEL", DEFAULT_CROSS_ENCODER_MODEL)
+CROSS_ENCODER_THRESHOLD = float(
+    os.getenv("CROSS_ENCODER_THRESHOLD", str(DEFAULT_CROSS_ENCODER_THRESHOLD))
+)
+
+
+@lru_cache(maxsize=1)
+def _get_model() -> CrossEncoder:
+    """Lazily initialize the cross-encoder once per process."""
+    return CrossEncoder(CROSS_ENCODER_MODEL)
 
 class Candidate(BaseModel):
     termId: int
@@ -25,16 +45,14 @@ def compare(req: CompareRequest):
         return {"results": []}
     
     # 각 candidate.answer와 question 점수 계산
-    scores = model.predict([(question, c.answer) for c in candidates])
+    scores = _get_model().predict([(question, c.answer) for c in candidates])
 
     # score와 candidate 객체를 튜플로 묶고 내림차순 정렬
     ranked = sorted(zip(candidates, scores), key=lambda x: x[1], reverse=True)
-    # 유사도가 5 이상인 것만 필터링
-    filtered = [(c, s) for c, s in ranked if s >= 6]
+    filtered = [(c, s) for c, s in ranked if float(s) >= CROSS_ENCODER_THRESHOLD]
 
-    # 상위 3개만 추출
-    top3 = filtered[:3]
+    # STEP B에서는 top-N=3을 유지 (STEP C에서 튜닝)
+    top3 = filtered[:DEFAULT_CROSS_ENCODER_TOP_N]
     # 결과 반환 (termId, answer, score 포함)
     result = [{"termId": c.termId, "answer": c.answer, "score": float(s)} for c, s in top3]
     return {"results": result}
-
