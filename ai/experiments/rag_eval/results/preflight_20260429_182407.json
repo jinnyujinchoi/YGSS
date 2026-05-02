@@ -1,0 +1,40 @@
+{
+  "timestamp": "2026-04-29T18:24:07.992444",
+  "passed": false,
+  "checks": {
+    "embedding_provider": {
+      "ok": true,
+      "value": "openai",
+      "expected": "openai"
+    },
+    "openai_embedding_call": {
+      "ok": false,
+      "model": "text-embedding-3-small",
+      "error": "openai package is not available"
+    },
+    "redis_scan": {
+      "ok": false,
+      "error": "redis package is not available"
+    },
+    "eval_set": {
+      "ok": true,
+      "count": 36,
+      "count_requirement": ">=30",
+      "all_have_correct_answer_ids": true
+    },
+    "sql_source": {
+      "ok": true
+    },
+    "cross_encoder_models": {
+      "ok": false,
+      "loaded": [],
+      "required": [
+        "production_baseline",
+        "kpf_ko",
+        "ko_reranker",
+        "bge_m3"
+      ]
+    }
+  },
+  "model_load_status_file": "results/model_load_status.json"
+}

@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import hashlib
 import os
 from dataclasses import dataclass
-from typing import Iterable, List, Sequence
+from typing import List, Sequence
 
 import numpy as np
 
@@ -28,50 +27,10 @@ class EmbeddingProvider:
     """Base protocol for embedding providers."""
 
     def embed_text(self, text: str) -> np.ndarray:
-        """Embed a single text into a float vector."""
         raise NotImplementedError
 
     def embed_texts(self, texts: Sequence[str]) -> List[np.ndarray]:
-        """Embed multiple texts preserving input order."""
         return [self.embed_text(text) for text in texts]
-
-
-class LocalHashEmbeddingProvider(EmbeddingProvider):
-    """Deterministic offline embedder for reproducible local evaluation."""
-
-    def __init__(self, dimension: int = 1536) -> None:
-        self.dimension = dimension
-
-    def _hash_token(self, token: str) -> np.ndarray:
-        seed = int(hashlib.sha256(token.encode("utf-8")).hexdigest()[:16], 16)
-        rng = np.random.default_rng(seed)
-        return rng.standard_normal(self.dimension, dtype=np.float32)
-
-    @staticmethod
-    def _char_ngrams(text: str, min_n: int = 2, max_n: int = 4) -> List[str]:
-        compact = "".join(ch for ch in text.lower() if not ch.isspace())
-        grams: List[str] = []
-        for n in range(min_n, max_n + 1):
-            if len(compact) < n:
-                continue
-            for i in range(len(compact) - n + 1):
-                grams.append(compact[i : i + n])
-        return grams
-
-    def embed_text(self, text: str) -> np.ndarray:
-        tokens = [tok for tok in text.lower().split() if tok]
-        tokens.extend(self._char_ngrams(text))
-        if not tokens:
-            return np.zeros(self.dimension, dtype=np.float32)
-
-        vec = np.zeros(self.dimension, dtype=np.float32)
-        for token in tokens:
-            vec += self._hash_token(token)
-
-        norm = float(np.linalg.norm(vec))
-        if norm == 0.0:
-            return vec
-        return vec / norm
 
 
 class OpenAIEmbeddingProvider(EmbeddingProvider):
@@ -83,10 +42,7 @@ class OpenAIEmbeddingProvider(EmbeddingProvider):
 
         api_key = os.getenv(config.api_key_env)
         if not api_key:
-            raise RuntimeError(
-                f"Missing OpenAI API key env: {config.api_key_env}. "
-                "Use local-hash provider for offline runs."
-            )
+            raise RuntimeError(f"Missing OpenAI API key env: {config.api_key_env}")
 
         base_url = os.getenv(config.base_url_env) or None
         self.client = OpenAI(api_key=api_key, base_url=base_url)
@@ -109,9 +65,8 @@ def create_embedder(
     openai_config: OpenAIEmbeddingConfig,
     dimension: int,
 ) -> EmbeddingProvider:
-    """Create the configured embedding provider with safe fallback."""
-    if provider_name == "openai":
-        return OpenAIEmbeddingProvider(openai_config)
-    if provider_name == "local-hash":
-        return LocalHashEmbeddingProvider(dimension=dimension)
-    raise ValueError(f"Unsupported embedding provider: {provider_name}")
+    """Create the configured embedding provider with strict mode."""
+    del dimension
+    if provider_name != "openai":
+        raise RuntimeError(f"Unsupported embedding provider for measurement mode: {provider_name}")
+    return OpenAIEmbeddingProvider(openai_config)

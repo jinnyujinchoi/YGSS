@@ -1,16 +1,27 @@
 openai:
   api_key_env: OPENAI_API_KEY
-  base_url_env: OPENAI_BASE_URL
+  base_url_env: ""          # Colab: 비워두면 표준 OpenAI endpoint 사용. GMS 프록시 쓸 때만 채울 것
   embedding_model: text-embedding-3-small
 
 embedding:
-  provider: local-hash
+  provider: openai
   dimension: 1536
 
 models:
-  production_cross_encoder: cross-encoder/ms-marco-MiniLM-L-12-v2
-  korean_cross_encoder: Dongjin-kr/ko-reranker
-  scorer_mode: lexical
+  cross_encoders:
+    candidates:
+      - name: production_baseline
+        hf_id: cross-encoder/ms-marco-MiniLM-L-12-v2
+        language: en
+      - name: dragonkue_bge_m3_ko
+        hf_id: dragonkue/bge-reranker-v2-m3-ko
+        language: ko
+      - name: ko_reranker
+        hf_id: Dongjin-kr/ko-reranker
+        language: ko
+      - name: bge_m3
+        hf_id: BAAI/bge-reranker-v2-m3
+        language: multi
 
 retrieval:
   thresholds: [0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60]

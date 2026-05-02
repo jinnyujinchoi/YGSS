@@ -9,3 +9,6 @@ results/tmp_*.png
 results/raw_*.json
 results/raw_*.csv
 results/raw_*.png
+models/
+.huggingface/
+.cache/huggingface/

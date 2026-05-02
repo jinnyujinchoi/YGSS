@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass
 from datetime import datetime
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 from typing import Dict, List
 
@@ -12,19 +14,11 @@ import matplotlib.pyplot as plt
 import yaml
 from dotenv import load_dotenv
 
-from .cross_encoder import CandidateAnswer, CrossEncoderRegistry, rerank_candidates
+from .cross_encoder import CandidateAnswer, CrossEncoderCandidate, rerank_candidates
 from .embedder import OpenAIEmbeddingConfig, create_embedder
 from .metrics import QueryEvaluation, compute_metric_summary
+from .preflight import run_preflight
 from .redis_search import DumpVectorSearcher, RedisVectorSearcher, parse_chat_dummy_sql
-
-
-@dataclass
-class EvalSample:
-    """Evaluation set item."""
-
-    question: str
-    correct_answer_ids: List[int]
-    category: str
 
 
 def _load_config() -> Dict:
@@ -32,11 +26,6 @@ def _load_config() -> Dict:
     if not config_path.exists():
         raise FileNotFoundError("config.yaml not found. Run from ai/experiments/rag_eval")
     return yaml.safe_load(config_path.read_text(encoding="utf-8"))
-
-
-def _load_eval_set(path: Path) -> List[EvalSample]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    return [EvalSample(**item) for item in payload]
 
 
 def _timestamp() -> str:
@@ -74,16 +63,38 @@ def _save_plot(output_path: Path, threshold_rows: List[Dict[str, float]]) -> Non
     plt.close()
 
 
+def _get_git_commit() -> str:
+    try:
+        return subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    except Exception:
+        return "unknown"
+
+
+def _move_invalid_results(output_dir: Path) -> None:
+    invalid_dir = output_dir / "_invalid"
+    invalid_dir.mkdir(parents=True, exist_ok=True)
+    for file_path in output_dir.glob("baseline_*"):
+        if file_path.is_file():
+            shutil.move(str(file_path), str(invalid_dir / f"legacy_{file_path.name}"))
+
+
 def main() -> None:
-    """Run end-to-end threshold sweep and save result artifacts."""
     load_dotenv()
     cfg = _load_config()
+    root = Path.cwd()
+    output_dir = _resolve_path(cfg["results"]["output_dir"])
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    preflight = run_preflight(cfg, root)
+    if not preflight.passed:
+        _move_invalid_results(output_dir)
+        print(f"[fail] preflight failed: {preflight.report_path}")
+        sys.exit(1)
 
     eval_set_path = _resolve_path(cfg["data"]["eval_set_path"])
     sql_path = _resolve_path(cfg["data"]["chat_dummy_sql_path"])
-    output_dir = _resolve_path(cfg["results"]["output_dir"])
 
-    eval_set = _load_eval_set(eval_set_path)
+    eval_set_payload = json.loads(eval_set_path.read_text(encoding="utf-8"))
     answer_map = parse_chat_dummy_sql(sql_path)
 
     openai_cfg = OpenAIEmbeddingConfig(
@@ -111,74 +122,58 @@ def main() -> None:
         if dump_path.exists():
             searcher = DumpVectorSearcher.from_jsonl(path=dump_path, answer_map=answer_map)
         else:
-            searcher = DumpVectorSearcher.from_sql_records(
-                records=answer_map,
-                embed_text_fn=embedder.embed_texts,
-            )
+            searcher = DumpVectorSearcher.from_sql_records(records=answer_map, embed_text_fn=embedder.embed_texts)
 
-    registry = CrossEncoderRegistry(
-        model_map={
-            "production": cfg["models"]["production_cross_encoder"],
-            "korean": cfg["models"]["korean_cross_encoder"],
-        },
-        scorer_mode=cfg["models"]["scorer_mode"],
-    )
-    scorer = registry.get("production")
+    candidates = [CrossEncoderCandidate(**item) for item in cfg["models"]["cross_encoders"]["candidates"]]
+    production = [item for item in candidates if item.name == "production_baseline"]
+    if not production:
+        raise RuntimeError("production_baseline candidate not found in config")
+
+    from .cross_encoder import load_candidates_with_status
+
+    loaded, status = load_candidates_with_status(production)
+    if "production_baseline" not in loaded:
+        raise RuntimeError(f"production_baseline failed to load: {status.get('production_baseline')}")
+    scorer = loaded["production_baseline"]
 
     thresholds = [float(value) for value in cfg["retrieval"]["thresholds"]]
     bi_top_k = int(cfg["retrieval"]["bi_top_k"])
     cross_threshold = float(cfg["retrieval"]["cross_encoder_threshold"])
     cross_top_n = int(cfg["retrieval"]["cross_top_n"])
     cutoffs = [int(value) for value in cfg["retrieval"]["metric_cutoffs"]]
-    scorer_mode = str(cfg["models"]["scorer_mode"])
 
     threshold_rows: List[Dict[str, float]] = []
     per_threshold_examples: Dict[str, List[Dict]] = {}
 
+    query_vectors = embedder.embed_texts([sample["question"] for sample in eval_set_payload])
     for threshold in thresholds:
         records: List[QueryEvaluation] = []
         examples: List[Dict] = []
 
-        query_vectors = embedder.embed_texts([sample.question for sample in eval_set])
-
-        for sample, query_vector in zip(eval_set, query_vectors):
-            bi_hits = searcher.search(
-                query_vector=query_vector,
-                k=bi_top_k,
-                min_similarity=threshold,
-            )
-
-            candidates = [
-                CandidateAnswer(
-                    answer_id=hit.answer_id,
-                    term_id=hit.term_id,
-                    answer=hit.answer,
-                )
+        for sample, query_vector in zip(eval_set_payload, query_vectors):
+            bi_hits = searcher.search(query_vector=query_vector, k=bi_top_k, min_similarity=threshold)
+            candidates_for_query = [
+                CandidateAnswer(answer_id=hit.answer_id, term_id=hit.term_id, answer=hit.answer)
                 for hit in bi_hits
             ]
 
             reranked = rerank_candidates(
-                query=sample.question,
-                candidates=candidates,
+                query=sample["question"],
+                candidates=candidates_for_query,
                 scorer=scorer,
                 threshold=cross_threshold,
                 top_n=cross_top_n,
             )
 
             predicted_ids = [cand.answer_id for cand, _ in reranked]
-            records.append(
-                QueryEvaluation(
-                    predicted_ids=predicted_ids,
-                    correct_ids=sample.correct_answer_ids,
-                )
-            )
+            records.append(QueryEvaluation(predicted_ids=predicted_ids, correct_ids=sample["correct_answer_ids"]))
 
             if len(examples) < 5:
                 examples.append(
                     {
-                        "question": sample.question,
-                        "category": sample.category,
-                        "gold_ids": sample.correct_answer_ids,
+                        "question": sample["question"],
+                        "category": sample["category"],
+                        "gold_ids": sample["correct_answer_ids"],
                         "bi_candidates": [hit.answer_id for hit in bi_hits],
                         "final_predicted_ids": predicted_ids,
                     }
@@ -189,14 +184,17 @@ def main() -> None:
         threshold_rows.append(metrics)
         per_threshold_examples[f"{threshold:.2f}"] = examples
 
-    output_dir.mkdir(parents=True, exist_ok=True)
-
     timestamp = _timestamp()
     raw_json = output_dir / f"raw_threshold_sweep_{timestamp}.json"
     raw_png = output_dir / f"raw_threshold_sweep_{timestamp}.png"
 
     payload = {
         "generated_at": datetime.now().isoformat(),
+        "timestamp": timestamp,
+        "git_commit": _get_git_commit(),
+        "preflight_passed": True,
+        "embedder": f"openai/{cfg['openai']['embedding_model']}",
+        "models_loaded": preflight.models_loaded,
         "config_snapshot": {
             "embedding_provider": cfg["embedding"]["provider"],
             "source_mode": source_mode,
@@ -204,12 +202,7 @@ def main() -> None:
             "cross_top_n": cross_top_n,
             "bi_top_k": bi_top_k,
             "metric_cutoffs": cutoffs,
-            "scorer_mode": scorer_mode,
         },
-        "notes": [
-            "This baseline is an offline fallback smoke test for framework execution validation.",
-            "It does NOT represent production RAG retrieval quality."
-        ],
         "threshold_results": threshold_rows,
         "examples": per_threshold_examples,
     }
@@ -217,8 +210,8 @@ def main() -> None:
     raw_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     _save_plot(raw_png, threshold_rows)
 
-    baseline_json = output_dir / cfg["results"]["baseline_json"]
-    baseline_png = output_dir / cfg["results"]["baseline_png"]
+    baseline_json = output_dir / f"baseline_threshold_sweep_{timestamp}.json"
+    baseline_png = output_dir / f"baseline_threshold_sweep_{timestamp}.png"
     baseline_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     _save_plot(baseline_png, threshold_rows)
 

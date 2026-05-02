@@ -1,0 +1,46 @@
+{
+  "production_baseline": {
+    "status": "ok",
+    "loader": "sentence-transformers",
+    "hf_id": "cross-encoder/ms-marco-MiniLM-L-12-v2",
+    "language": "en",
+    "attempted_loaders": [
+      "sentence-transformers",
+      "transformers-direct"
+    ],
+    "load_seconds": 8.3768
+  },
+  "dragonkue_bge_m3_ko": {
+    "status": "failed",
+    "hf_id": "dragonkue/bge-reranker-v2-m3-ko",
+    "language": "ko",
+    "attempted_loaders": [
+      "sentence-transformers",
+      "transformers-direct"
+    ],
+    "error": "Failed to load cross-encoder 'dragonkue/bge-reranker-v2-m3-ko'. Attempts: sentence-transformers: Can't load the model for 'dragonkue/bge-reranker-v2-m3-ko'. If you were trying to load it from 'https://huggingface.co/models', make sure you don't have a local directory with the same name. Otherwise, make sure 'dragonkue/bge-reranker-v2-m3-ko' is the correct path to a directory containing a file named pytorch_model.bin. | transformers-direct: Can't load tokenizer for 'dragonkue/bge-reranker-v2-m3-ko'. If you were trying to load it from 'https://huggingface.co/models', make sure you don't have a local directory with the same name. Otherwise, make sure 'dragonkue/bge-reranker-v2-m3-ko' is the correct path to a directory containing all relevant files for a XLMRobertaTokenizer tokenizer.",
+    "load_seconds": 39.3531
+  },
+  "ko_reranker": {
+    "status": "failed",
+    "hf_id": "Dongjin-kr/ko-reranker",
+    "language": "ko",
+    "attempted_loaders": [
+      "sentence-transformers",
+      "transformers-direct"
+    ],
+    "error": "Failed to load cross-encoder 'Dongjin-kr/ko-reranker'. Attempts: sentence-transformers: Can't load the model for 'Dongjin-kr/ko-reranker'. If you were trying to load it from 'https://huggingface.co/models', make sure you don't have a local directory with the same name. Otherwise, make sure 'Dongjin-kr/ko-reranker' is the correct path to a directory containing a file named pytorch_model.bin. | transformers-direct: Can't load the model for 'Dongjin-kr/ko-reranker'. If you were trying to load it from 'https://huggingface.co/models', make sure you don't have a local directory with the same name. Otherwise, make sure 'Dongjin-kr/ko-reranker' is the correct path to a directory containing a file named pytorch_model.bin.",
+    "load_seconds": 96.9938
+  },
+  "bge_m3": {
+    "status": "failed",
+    "hf_id": "BAAI/bge-reranker-v2-m3",
+    "language": "multi",
+    "attempted_loaders": [
+      "sentence-transformers",
+      "transformers-direct"
+    ],
+    "error": "Failed to load cross-encoder 'BAAI/bge-reranker-v2-m3'. Attempts: sentence-transformers: Can't load the model for 'BAAI/bge-reranker-v2-m3'. If you were trying to load it from 'https://huggingface.co/models', make sure you don't have a local directory with the same name. Otherwise, make sure 'BAAI/bge-reranker-v2-m3' is the correct path to a directory containing a file named pytorch_model.bin. | transformers-direct: Can't load the model for 'BAAI/bge-reranker-v2-m3'. If you were trying to load it from 'https://huggingface.co/models', make sure you don't have a local directory with the same name. Otherwise, make sure 'BAAI/bge-reranker-v2-m3' is the correct path to a directory containing a file named pytorch_model.bin.",
+    "load_seconds": 48.783
+  }
+}
