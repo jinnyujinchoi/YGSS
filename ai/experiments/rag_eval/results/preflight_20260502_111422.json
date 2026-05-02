@@ -1,0 +1,47 @@
+{
+  "timestamp": "2026-05-02T11:14:22.564553",
+  "passed": false,
+  "checks": {
+    "embedding_provider": {
+      "ok": true,
+      "value": "openai",
+      "expected": "openai"
+    },
+    "openai_embedding_call": {
+      "ok": false,
+      "model": "text-embedding-3-small",
+      "error": "Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}"
+    },
+    "redis_scan": {
+      "ok": true,
+      "skipped": true,
+      "reason": "source_mode=sql_dump, Redis not required"
+    },
+    "eval_set": {
+      "ok": true,
+      "count": 36,
+      "count_requirement": ">=30",
+      "all_have_correct_answer_ids": true
+    },
+    "sql_source": {
+      "ok": false,
+      "error": "[Errno 2] No such file or directory: '/exec/basic_insert.sql'"
+    },
+    "cross_encoder_models": {
+      "ok": true,
+      "loaded": [
+        "bge_m3",
+        "dragonkue_bge_m3_ko",
+        "ko_reranker",
+        "production_baseline"
+      ],
+      "required": [
+        "production_baseline",
+        "dragonkue_bge_m3_ko",
+        "ko_reranker",
+        "bge_m3"
+      ]
+    }
+  },
+  "model_load_status_file": "results/model_load_status.json"
+}

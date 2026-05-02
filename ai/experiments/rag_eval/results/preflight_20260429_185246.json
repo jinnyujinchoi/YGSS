@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-04-29T18:52:46.885819",
+  "passed": false,
+  "checks": {
+    "embedding_provider": {
+      "ok": true,
+      "value": "openai",
+      "expected": "openai"
+    },
+    "openai_embedding_call": {
+      "ok": false,
+      "model": "text-embedding-3-small",
+      "error": "Connection error."
+    },
+    "redis_scan": {
+      "ok": false,
+      "host": "127.0.0.1",
+      "port": 6379,
+      "db": 0,
+      "error": "Error 1 connecting to 127.0.0.1:6379. Operation not permitted."
+    },
+    "eval_set": {
+      "ok": true,
+      "count": 36,
+      "count_requirement": ">=30",
+      "all_have_correct_answer_ids": true
+    },
+    "sql_source": {
+      "ok": true
+    },
+    "cross_encoder_models": {
+      "ok": false,
+      "loaded": [
+        "production_baseline"
+      ],
+      "required": [
+        "production_baseline",
+        "dragonkue_bge_m3_ko",
+        "ko_reranker",
+        "bge_m3"
+      ]
+    }
+  },
+  "model_load_status_file": "results/model_load_status.json"
+}
