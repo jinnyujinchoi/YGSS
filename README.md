@@ -1,7 +1,7 @@
 # YGSS RAG 시스템 리팩토링
 
 > **작업 기간:** 2026.04.26 ~ 2026.05.04  
-> **브랜치:** `refactor` (master 미반영)
+> **브랜치:** `refactor`(master 미반영)
 > **작업자:** jinnyujinchoi
 
 ---
@@ -14,7 +14,6 @@
 4. [측정 결과](#측정-결과)
 5. [디렉토리 구조](#디렉토리-구조)
 6. [실행 방법](#실행-방법)
-7. [후속 과제](#후속-과제)
 
 ---
 
@@ -132,7 +131,7 @@ master
 
 ### STEP A: Bi-Encoder 임계값 스윕
 
-![baseline_threshold_sweep](results/baseline_threshold_sweep_20260502_112611.png)
+![baseline_threshold_sweep](ai/experiments/rag_eval/results/baseline_threshold_sweep_20260502_112611.png)
 
 **관찰:** 임계값 0.45 → 0.60으로 올릴수록 Recall, MRR이 상승.
 현재 0.45는 너무 낮아 관련 없는 후보까지 Cross-Encoder로 넘기고 있음을 발견,
@@ -140,14 +139,14 @@ master
 
 ### STEP B: Cross-Encoder 모델 비교
 
-![f1_ko_reranker](results/f1_curve_ko_reranker_20260502_113633.png)
+![f1_ko_reranker](ai/experiments/rag_eval/results/f1_curve_ko_reranker_20260502_113633.png)
 
 **관찰:** ko_reranker의 best F1 cutoff는 0.516이었으나,  
 grid search에서 cross_threshold 민감도 분석 결과 0.41~0.46이 실제 최적 구간으로 확인.
 
 ### STEP C: Grid Search
 
-![pareto](results/grid_search_pareto.png)
+![pareto](ai/experiments/rag_eval/results/grid_search_pareto.png)
 
 **Pareto front:** latency 246ms 이내에서 F1@3 최대값은 0.274
 
