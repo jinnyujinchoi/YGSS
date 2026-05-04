@@ -1,0 +1,531 @@
+{
+  "generated_at": "2026-04-26T17:18:47.505702",
+  "config_snapshot": {
+    "embedding_provider": "local-hash",
+    "source_mode": "sql_dump",
+    "cross_encoder_threshold": 6.0,
+    "effective_cross_encoder_threshold": 2.0,
+    "cross_top_n": 3,
+    "bi_top_k": 10,
+    "metric_cutoffs": [
+      1,
+      3,
+      5
+    ],
+    "scorer_mode": "lexical"
+  },
+  "threshold_results": [
+    {
+      "precision_at_1": 0.3611111111111111,
+      "recall_at_1": 0.3611111111111111,
+      "precision_at_3": 0.17592592592592593,
+      "recall_at_3": 0.4861111111111111,
+      "precision_at_5": 0.10555555555555556,
+      "recall_at_5": 0.4861111111111111,
+      "mrr": 0.42592592592592593,
+      "no_result_rate": 0.4166666666666667,
+      "threshold": 0.3
+    },
+    {
+      "precision_at_1": 0.3888888888888889,
+      "recall_at_1": 0.3888888888888889,
+      "precision_at_3": 0.17592592592592593,
+      "recall_at_3": 0.4722222222222222,
+      "precision_at_5": 0.10555555555555556,
+      "recall_at_5": 0.4722222222222222,
+      "mrr": 0.4305555555555556,
+      "no_result_rate": 0.4444444444444444,
+      "threshold": 0.35
+    },
+    {
+      "precision_at_1": 0.3611111111111111,
+      "recall_at_1": 0.3472222222222222,
+      "precision_at_3": 0.1388888888888889,
+      "recall_at_3": 0.375,
+      "precision_at_5": 0.08333333333333334,
+      "recall_at_5": 0.375,
+      "mrr": 0.375,
+      "no_result_rate": 0.5833333333333334,
+      "threshold": 0.4
+    },
+    {
+      "precision_at_1": 0.16666666666666666,
+      "recall_at_1": 0.16666666666666666,
+      "precision_at_3": 0.06481481481481481,
+      "recall_at_3": 0.18055555555555555,
+      "precision_at_5": 0.03888888888888889,
+      "recall_at_5": 0.18055555555555555,
+      "mrr": 0.18055555555555555,
+      "no_result_rate": 0.8055555555555556,
+      "threshold": 0.45
+    },
+    {
+      "precision_at_1": 0.16666666666666666,
+      "recall_at_1": 0.1527777777777778,
+      "precision_at_3": 0.05555555555555555,
+      "recall_at_3": 0.1527777777777778,
+      "precision_at_5": 0.03333333333333333,
+      "recall_at_5": 0.1527777777777778,
+      "mrr": 0.16666666666666666,
+      "no_result_rate": 0.8333333333333334,
+      "threshold": 0.5
+    },
+    {
+      "precision_at_1": 0.1388888888888889,
+      "recall_at_1": 0.125,
+      "precision_at_3": 0.046296296296296294,
+      "recall_at_3": 0.125,
+      "precision_at_5": 0.02777777777777778,
+      "recall_at_5": 0.125,
+      "mrr": 0.1388888888888889,
+      "no_result_rate": 0.8611111111111112,
+      "threshold": 0.55
+    },
+    {
+      "precision_at_1": 0.027777777777777776,
+      "recall_at_1": 0.013888888888888888,
+      "precision_at_3": 0.009259259259259259,
+      "recall_at_3": 0.013888888888888888,
+      "precision_at_5": 0.005555555555555556,
+      "recall_at_5": 0.013888888888888888,
+      "mrr": 0.027777777777777776,
+      "no_result_rate": 0.9722222222222222,
+      "threshold": 0.6
+    }
+  ],
+  "examples": {
+    "0.30": [
+      {
+        "question": "DB형 퇴직연금이 뭐예요?",
+        "category": "정의형",
+        "gold_ids": [
+          1
+        ],
+        "bi_candidates": [
+          1,
+          2,
+          3,
+          4,
+          13,
+          6,
+          12,
+          15,
+          16,
+          8
+        ],
+        "final_predicted_ids": [
+          1,
+          15,
+          4
+        ]
+      },
+      {
+        "question": "DB형 퇴직연금의 장단점을 간단히 알려줘",
+        "category": "비교형",
+        "gold_ids": [
+          2,
+          3
+        ],
+        "bi_candidates": [
+          2,
+          3,
+          1,
+          13,
+          4,
+          12
+        ],
+        "final_predicted_ids": [
+          1,
+          4,
+          3
+        ]
+      },
+      {
+        "question": "DB형에서 받는 퇴직금 계산 기준이 어떻게 돼?",
+        "category": "계산형",
+        "gold_ids": [
+          8
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      },
+      {
+        "question": "DB형 가입자는 직접 운용할 수 있어?",
+        "category": "맥락형",
+        "gold_ids": [
+          6
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      },
+      {
+        "question": "DB형을 DC형으로 바꿀 수 있나요?",
+        "category": "맥락형",
+        "gold_ids": [
+          10
+        ],
+        "bi_candidates": [
+          10
+        ],
+        "final_predicted_ids": [
+          10
+        ]
+      }
+    ],
+    "0.35": [
+      {
+        "question": "DB형 퇴직연금이 뭐예요?",
+        "category": "정의형",
+        "gold_ids": [
+          1
+        ],
+        "bi_candidates": [
+          1,
+          2,
+          3,
+          4,
+          13,
+          6,
+          12,
+          15,
+          16,
+          8
+        ],
+        "final_predicted_ids": [
+          1,
+          15,
+          4
+        ]
+      },
+      {
+        "question": "DB형 퇴직연금의 장단점을 간단히 알려줘",
+        "category": "비교형",
+        "gold_ids": [
+          2,
+          3
+        ],
+        "bi_candidates": [
+          2,
+          3,
+          1,
+          13
+        ],
+        "final_predicted_ids": [
+          1,
+          3,
+          2
+        ]
+      },
+      {
+        "question": "DB형에서 받는 퇴직금 계산 기준이 어떻게 돼?",
+        "category": "계산형",
+        "gold_ids": [
+          8
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      },
+      {
+        "question": "DB형 가입자는 직접 운용할 수 있어?",
+        "category": "맥락형",
+        "gold_ids": [
+          6
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      },
+      {
+        "question": "DB형을 DC형으로 바꿀 수 있나요?",
+        "category": "맥락형",
+        "gold_ids": [
+          10
+        ],
+        "bi_candidates": [
+          10
+        ],
+        "final_predicted_ids": [
+          10
+        ]
+      }
+    ],
+    "0.40": [
+      {
+        "question": "DB형 퇴직연금이 뭐예요?",
+        "category": "정의형",
+        "gold_ids": [
+          1
+        ],
+        "bi_candidates": [
+          1,
+          2,
+          3,
+          4,
+          13,
+          6,
+          12
+        ],
+        "final_predicted_ids": [
+          1,
+          4,
+          12
+        ]
+      },
+      {
+        "question": "DB형 퇴직연금의 장단점을 간단히 알려줘",
+        "category": "비교형",
+        "gold_ids": [
+          2,
+          3
+        ],
+        "bi_candidates": [
+          2,
+          3
+        ],
+        "final_predicted_ids": [
+          3,
+          2
+        ]
+      },
+      {
+        "question": "DB형에서 받는 퇴직금 계산 기준이 어떻게 돼?",
+        "category": "계산형",
+        "gold_ids": [
+          8
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      },
+      {
+        "question": "DB형 가입자는 직접 운용할 수 있어?",
+        "category": "맥락형",
+        "gold_ids": [
+          6
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      },
+      {
+        "question": "DB형을 DC형으로 바꿀 수 있나요?",
+        "category": "맥락형",
+        "gold_ids": [
+          10
+        ],
+        "bi_candidates": [
+          10
+        ],
+        "final_predicted_ids": [
+          10
+        ]
+      }
+    ],
+    "0.45": [
+      {
+        "question": "DB형 퇴직연금이 뭐예요?",
+        "category": "정의형",
+        "gold_ids": [
+          1
+        ],
+        "bi_candidates": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "final_predicted_ids": [
+          1,
+          4,
+          2
+        ]
+      },
+      {
+        "question": "DB형 퇴직연금의 장단점을 간단히 알려줘",
+        "category": "비교형",
+        "gold_ids": [
+          2,
+          3
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      },
+      {
+        "question": "DB형에서 받는 퇴직금 계산 기준이 어떻게 돼?",
+        "category": "계산형",
+        "gold_ids": [
+          8
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      },
+      {
+        "question": "DB형 가입자는 직접 운용할 수 있어?",
+        "category": "맥락형",
+        "gold_ids": [
+          6
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      },
+      {
+        "question": "DB형을 DC형으로 바꿀 수 있나요?",
+        "category": "맥락형",
+        "gold_ids": [
+          10
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      }
+    ],
+    "0.50": [
+      {
+        "question": "DB형 퇴직연금이 뭐예요?",
+        "category": "정의형",
+        "gold_ids": [
+          1
+        ],
+        "bi_candidates": [
+          1
+        ],
+        "final_predicted_ids": [
+          1
+        ]
+      },
+      {
+        "question": "DB형 퇴직연금의 장단점을 간단히 알려줘",
+        "category": "비교형",
+        "gold_ids": [
+          2,
+          3
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      },
+      {
+        "question": "DB형에서 받는 퇴직금 계산 기준이 어떻게 돼?",
+        "category": "계산형",
+        "gold_ids": [
+          8
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      },
+      {
+        "question": "DB형 가입자는 직접 운용할 수 있어?",
+        "category": "맥락형",
+        "gold_ids": [
+          6
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      },
+      {
+        "question": "DB형을 DC형으로 바꿀 수 있나요?",
+        "category": "맥락형",
+        "gold_ids": [
+          10
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      }
+    ],
+    "0.55": [
+      {
+        "question": "DB형 퇴직연금이 뭐예요?",
+        "category": "정의형",
+        "gold_ids": [
+          1
+        ],
+        "bi_candidates": [
+          1
+        ],
+        "final_predicted_ids": [
+          1
+        ]
+      },
+      {
+        "question": "DB형 퇴직연금의 장단점을 간단히 알려줘",
+        "category": "비교형",
+        "gold_ids": [
+          2,
+          3
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      },
+      {
+        "question": "DB형에서 받는 퇴직금 계산 기준이 어떻게 돼?",
+        "category": "계산형",
+        "gold_ids": [
+          8
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      },
+      {
+        "question": "DB형 가입자는 직접 운용할 수 있어?",
+        "category": "맥락형",
+        "gold_ids": [
+          6
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      },
+      {
+        "question": "DB형을 DC형으로 바꿀 수 있나요?",
+        "category": "맥락형",
+        "gold_ids": [
+          10
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      }
+    ],
+    "0.60": [
+      {
+        "question": "DB형 퇴직연금이 뭐예요?",
+        "category": "정의형",
+        "gold_ids": [
+          1
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      },
+      {
+        "question": "DB형 퇴직연금의 장단점을 간단히 알려줘",
+        "category": "비교형",
+        "gold_ids": [
+          2,
+          3
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      },
+      {
+        "question": "DB형에서 받는 퇴직금 계산 기준이 어떻게 돼?",
+        "category": "계산형",
+        "gold_ids": [
+          8
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      },
+      {
+        "question": "DB형 가입자는 직접 운용할 수 있어?",
+        "category": "맥락형",
+        "gold_ids": [
+          6
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      },
+      {
+        "question": "DB형을 DC형으로 바꿀 수 있나요?",
+        "category": "맥락형",
+        "gold_ids": [
+          10
+        ],
+        "bi_candidates": [],
+        "final_predicted_ids": []
+      }
+    ]
+  }
+}
