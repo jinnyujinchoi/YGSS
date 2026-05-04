@@ -8,19 +8,18 @@ from sentence_transformers import CrossEncoder
 
 router = APIRouter()
 
-# Step B calibration artifacts:
-# - selected alias `mmarco_multilingual` maps to model_id
-#   `cross-encoder/mmarco-mMiniLMv2-L12-H384-v1`
-# - ai/experiments/rag_eval/results/cross_encoder_comparison_20260426_180439.md
-# - ai/experiments/rag_eval/results/threshold_calibration_cross-encoder_mmarco-mMiniLMv2-L12-H384-v1.json
-DEFAULT_CROSS_ENCODER_MODEL = "cross-encoder/mmarco-mMiniLMv2-L12-H384-v1"
-DEFAULT_CROSS_ENCODER_THRESHOLD = -2.4304255588090604
+# STEP C defaults:
+# - v3 selected ko-reranker: results/cross_encoder_comparison_20260502_113638.json
+# - STEP C grid-search recommendation is applied via env override and can be updated without code changes.
+DEFAULT_CROSS_ENCODER_MODEL = "Dongjin-kr/ko-reranker"
+DEFAULT_CROSS_ENCODER_THRESHOLD = 0.516129
 DEFAULT_CROSS_ENCODER_TOP_N = 3
 
 CROSS_ENCODER_MODEL = os.getenv("CROSS_ENCODER_MODEL", DEFAULT_CROSS_ENCODER_MODEL)
 CROSS_ENCODER_THRESHOLD = float(
     os.getenv("CROSS_ENCODER_THRESHOLD", str(DEFAULT_CROSS_ENCODER_THRESHOLD))
 )
+CROSS_TOP_N = int(os.getenv("CROSS_TOP_N", str(DEFAULT_CROSS_ENCODER_TOP_N)))
 
 
 @lru_cache(maxsize=1)
@@ -51,8 +50,7 @@ def compare(req: CompareRequest):
     ranked = sorted(zip(candidates, scores), key=lambda x: x[1], reverse=True)
     filtered = [(c, s) for c, s in ranked if float(s) >= CROSS_ENCODER_THRESHOLD]
 
-    # STEP B에서는 top-N=3을 유지 (STEP C에서 튜닝)
-    top3 = filtered[:DEFAULT_CROSS_ENCODER_TOP_N]
+    top3 = filtered[:CROSS_TOP_N]
     # 결과 반환 (termId, answer, score 포함)
     result = [{"termId": c.termId, "answer": c.answer, "score": float(s)} for c, s in top3]
     return {"results": result}

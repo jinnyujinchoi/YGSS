@@ -94,6 +94,30 @@ python -m src.runner
 - 모델마다 raw score 범위가 달라 threshold 해석도 모델별로 달라집니다.
 - 따라서 threshold는 모델별로 정답/오답 분포에서 별도로 보정해야 합니다.
 
+## STEP C (4-Parameter Grid Search)
+- 실행 순서:
+```bash
+python -m experiments.grid_search
+python -m experiments.select_best_combination
+python -m experiments.sensitivity_analysis
+python -m experiments.pareto_plot
+pytest -v tests/test_no_regression.py
+```
+- 산출물:
+  - `results/grid_search_{timestamp}.csv/.json`
+  - `results/optimal_combination.md`
+  - `results/sensitivity_bi_threshold.png`
+  - `results/sensitivity_bi_top_k.png`
+  - `results/sensitivity_cross_threshold.png`
+  - `results/sensitivity_cross_top_n.png`
+  - `results/grid_search_pareto.png`
+
+### 운영 모니터링 권장 지표
+- Top-3 정확도 (eval_set 주간 재측정)
+- p95 latency
+- no_result_rate
+- OpenAI 임베딩 호출 실패율
+
 ## 주의 사항
 - Redis 검색은 `SCAN`만 사용, `KEYS` 미사용
 - Redis 부하 제어 옵션(`scan_count`, `max_keys`, `timeout_seconds`) 제공
