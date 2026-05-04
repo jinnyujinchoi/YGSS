@@ -31,6 +31,14 @@ class PairScore:
     normalized_score: float
 
 
+@dataclass
+class CrossEncoderCandidate:
+    """Cross-encoder candidate config row used by preflight."""
+
+    name: str
+    model_name: str
+
+
 class BaseCrossEncoderScorer:
     """Cross-encoder scorer base class."""
 
@@ -168,3 +176,33 @@ def rerank_candidates_detailed(
         if score.raw_score >= raw_threshold
     ]
     return filtered[:top_n]
+
+
+def load_candidates_with_status(
+    candidates: Sequence[CrossEncoderCandidate],
+) -> Tuple[Dict[str, BaseCrossEncoderScorer], List[Dict[str, object]]]:
+    """Load candidate models and return status rows for preflight reporting."""
+    loaded: Dict[str, BaseCrossEncoderScorer] = {}
+    status: List[Dict[str, object]] = []
+    for candidate in candidates:
+        try:
+            scorer = SentenceTransformerScorer(candidate.model_name)
+            loaded[candidate.name] = scorer
+            status.append(
+                {
+                    "name": candidate.name,
+                    "model_name": candidate.model_name,
+                    "loaded": True,
+                    "error": "",
+                }
+            )
+        except Exception as exc:  # pragma: no cover - runtime model/env dependent
+            status.append(
+                {
+                    "name": candidate.name,
+                    "model_name": candidate.model_name,
+                    "loaded": False,
+                    "error": str(exc),
+                }
+            )
+    return loaded, status
